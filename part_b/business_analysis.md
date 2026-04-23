@@ -44,6 +44,11 @@ Justification:
 - A single global model may average out these effects and reduce predictive accuracy.
 - Segmented models capture local patterns more effectively, leading to better recommendations.
 
+Additionally, including store_id as a feature or using mixed-effects models allows the model to capture store-specific behavior while still leveraging overall data patterns.
+
+This approach balances generalization with local customization, improving prediction accuracy.
+
+
 ### B2 DATA AND EDA STRATEGY
 
 ### B2(a) Data Preparation and Joining Strategy
@@ -56,7 +61,7 @@ The data from four tables would be combined using appropriate keys:
 - Calendar table: join on date
 
 **Final Dataset Grain:**
-- One row per store per month
+- One row per store per month per promotion
 
 **Aggregations:**
 - Total items sold per store per month
@@ -64,8 +69,10 @@ The data from four tables would be combined using appropriate keys:
 - Total footfall
 - Promotion applied during the month
 - Number of weekends and festival days
+- - These analyses also help identify outliers and data quality issues that may impact model performance.
 
 This ensures that the dataset is structured at the same level at which decisions are made (monthly store-level).
+
 
 ### B2(b) Exploratory Data Analysis
 
@@ -93,17 +100,18 @@ These insights guide feature engineering and model selection by highlighting key
 
 If 80% of transactions occur without promotions:
 
-- The model may become biased toward predicting non-promotion scenarios.
-- It may underestimate the true impact of promotions.
+- The model may learn to ignore promotion effects due to underrepresentation.
+- It may underestimate the incremental impact of promotions on sales.
 
 To address this:
-- Use balanced sampling techniques
+
+- Ensure sufficient representation of promotional data through resampling or weighting
 - Introduce a binary feature indicating promotion presence
-- Ensure sufficient representation of promotion cases in training
+- Consider modelling uplift (incremental impact of promotions) rather than absolute sales
 
-This helps the model learn the true effect of promotions.
+This ensures the model captures the true causal impact of promotions.
 
-## MODEL EVALUTATION AND DEPLOYMENT
+## MODEL EVALUATION AND DEPLOYMENT
 
 
 ### B3(a) Train-Test Strategy and Evaluation Metrics
@@ -127,6 +135,8 @@ Interpretation:
 - Lower RMSE and MAE indicate better prediction accuracy
 - R² closer to 1 indicates strong explanatory power
 
+Additionally, model performance should be evaluated at the store level to ensure recommendations are reliable across different store types, not just on average.
+
 ### B3(b) Model Interpretation Using Feature Importance
 
 Feature importance helps explain why different promotions are recommended for the same store.
@@ -139,8 +149,11 @@ To communicate this:
 - Analyze feature importance scores
 - Use tools like SHAP values for deeper insights
 - Present findings in simple terms to stakeholders
+- Differences in recommendations across months are driven by seasonality and contextual features such as festivals, customer demand patterns, and past performance.
 
 This helps build trust in the model and supports data-driven decision-making.
+Differences in recommendations across months are driven by seasonality and contextual features such as festivals, customer demand patterns, and past performance.
+
 
 ### B3(c) Model Deployment and Monitoring
 
@@ -162,5 +175,5 @@ This helps build trust in the model and supports data-driven decision-making.
 If performance degrades:
 - Retrain the model using updated data
 
-This ensures the model remains accurate and relevant over time.
+This ensures the model remains accurate and relevant over time. Additionally, monitor prediction drift to ensure the relationship between features and target remains stable over time.
 
